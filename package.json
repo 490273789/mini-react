@@ -7,7 +7,7 @@
     "test": "vitest"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ethan",
   "license": "ISC",
   "devDependencies": {
     "vitest": "^3.2.4"

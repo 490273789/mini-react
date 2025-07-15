@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run __test__",
+    "test:watch": "vitest __test__"
   },
   "keywords": [],
   "author": "",
