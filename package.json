@@ -10,6 +10,7 @@
   "author": "Ethan",
   "license": "ISC",
   "devDependencies": {
+    "oxlint": "^1.7.0",
     "vitest": "^3.2.4"
   }
 }
