@@ -1,4 +1,7 @@
-export const maxSigned31BitInt = 1073741823; // 2^30 - 1
-export const userBlockingPriorityTimeout = 250; // 250ms
-export const normalPriorityTimeout = 5000; // 5s
-export const lowPriorityTimeout = 10000; // 10s
+export const enableProfiling = false;
+export const frameYieldMs = 5;
+
+export const userBlockingPriorityTimeout = 250;
+export const normalPriorityTimeout = 5000;
+export const lowPriorityTimeout = 10000;
+export const enableRequestPaint = true;
