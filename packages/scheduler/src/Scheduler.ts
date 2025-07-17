@@ -52,13 +52,13 @@ let currentPriorityLevel: PriorityLevel = NoPriority;
 /** 时间切片的起始值 */
 let startTime = -1;
 
-/** 时间切片的大小 */
+/** 每个时间片长度（毫秒） */
 let frameInterval = 5;
 
 /** 锁  是否有work在执行 */
 let isPerformingWork = false;
 
-/** 主线程是否正在调度 */
+/** 是否已经安排了调度 */
 let isHostCallbackScheduled = false;
 
 /** 是否在工作循环中 */
@@ -67,7 +67,7 @@ let isMessageLoopRunning = false;
 // 在计时
 let isHostTimeoutScheduled: boolean = false;
 
-let taskTimeoutID: number = -1;
+let taskTimeoutID = -1;
 
 function cancelHostTimeout() {
   clearTimeout(taskTimeoutID);
@@ -162,6 +162,7 @@ function scheduleCallback(
       requestHostTimeout(handleTimeout, startTime - currentTime);
     }
   } else {
+    // 排序索引：在任务队列中，我们按照过期时间排序，过期时间越小优先级越高（因为需要尽快执行）
     newTask.sortIndex = expirationTime;
     push(taskQueue, newTask);
 
@@ -282,6 +283,7 @@ function handleTimeout(currentTime: number) {
 
 /**
  * 开启任务循环,内部循环，负责执行任务队列中的任务
+ * 直到时间用完或任务队列为空
  * @param initialTime
  * @returns
  */
@@ -289,9 +291,8 @@ function workLoop(initialTime: number) {
   let currentTime = initialTime;
   currentTask = peek(taskQueue);
   while (currentTask !== null) {
-    // 1.有更高优先级的浏览器任务
-    // 2.当前帧的分配时间（默认为 5ms）已用完
-    // 3. currentTask.expirationTime > currentTime 任务未过期
+    // 当前任务还没有过期，但是时间片用完了，需要中断
+    // currentTask.expirationTime > currentTime 任务未过期
     if (currentTask.expirationTime > currentTime && shouldYieldToHost()) {
       // 当前任务还没有过期，并且没有剩余时间了
       break;
@@ -302,8 +303,10 @@ function workLoop(initialTime: number) {
       currentTask.callback = null;
       currentPriorityLevel = currentTask.priorityLevel;
       const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
+      // 执行任务的回调函数
       const continuationCallback = callback(didUserCallbackTimeout);
       if (typeof continuationCallback === "function") {
+        // 任务未完成，返回了一个继续执行的函数，更新任务的回调
         currentTask.callback = continuationCallback;
         return true;
       } else {
@@ -317,6 +320,15 @@ function workLoop(initialTime: number) {
       pop(taskQueue);
     }
     currentTask = peek(taskQueue) as Task;
+    if (currentTask !== null) {
+      return true;
+    } else {
+      const firstTimer = peek(timerQueue);
+      if (firstTimer !== null) {
+        requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
+      }
+      return false;
+    }
   }
 
   // 判断还有没有其他的任务
