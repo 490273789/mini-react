@@ -15,6 +15,16 @@ function createDOM(VNode) {
   // 1. 创建元素；2. 处理子元素；3. 处理属性值
   const { type, props } = VNode;
   let dom;
+  if (
+    typeof type === "function" &&
+    VNode.$$typeof === REACT_ELEMENT &&
+    type.IS_CLASS_COMPONENT
+  ) {
+    return getDomByClassComponent(VNode);
+  }
+  if (typeof type === "function" && VNode.$$typeof === REACT_ELEMENT) {
+    return getDomByFunctionComponent(VNode);
+  }
   if (type && VNode.$$typeof === REACT_ELEMENT) {
     dom = document.createElement(type);
   }
@@ -28,6 +38,7 @@ function createDOM(VNode) {
     }
   }
   setPropsForDOM(dom, props);
+  VNode.dom = dom;
   return dom;
 }
 
@@ -56,6 +67,46 @@ function mountArray(children, parent) {
       mount(children[i], parent);
     }
   }
+}
+
+/**
+ * 处理函数组件
+ * @param {*} VNode
+ * @returns
+ */
+function getDomByFunctionComponent(VNode) {
+  const { type, props } = VNode;
+  let renderVNode = type(props);
+  if (!renderVNode) return null;
+  return createDOM(renderVNode);
+}
+
+/**
+ * 处理类组件
+ * @param {*} VNode
+ * @returns
+ */
+function getDomByClassComponent(VNode) {
+  const { type, props } = VNode;
+  const instance = new type(props);
+  let renderVNode = instance.render();
+  instance.oldVNode = renderVNode;
+  setTimeout(() => {
+    instance.setState({ title: "你好" });
+  }, 3000);
+  if (!renderVNode) return null;
+  return createDOM(renderVNode);
+}
+
+export function findDomByVNode(VNode) {
+  if (!VNode) return;
+  if (VNode.dom) return VNode.dom;
+}
+
+export function updateDomTree(oldDom, newVNode) {
+  let parentNode = oldDom.parentNode;
+  parentNode.removeChild(oldDom);
+  parentNode.appendChild(createDOM(newVNode));
 }
 
 const ReactDom = { render };

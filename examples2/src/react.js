@@ -1,4 +1,5 @@
 import { REACT_ELEMENT } from "./constants.js";
+import { Component } from "./Component.js";
 // jsx被编译后的结果
 // React.createElement(
 //   "div",
@@ -38,5 +39,6 @@ export function createElement(type, properties, children) {
 
 const React = {
   createElement,
+  Component,
 };
 export default React;
