@@ -23,6 +23,7 @@ class Updater {
     this.pendingStates.push(partialState);
     this.preHandleForUpdate();
   }
+
   /**
    * 判断是否需要批量更新
    * 如果是批量更新，则将当前的updater添加到队列中
@@ -73,7 +74,7 @@ export class Component {
   }
 
   /**
-   * 1. 获取重新执行render 函数后的虚拟DOM
+   * 1. 获取重新执行render函数后的虚拟DOM
    * 2. 根据新的虚拟DOM生成真实DOM
    * 3. 将真实DOM挂在在页面上
    */

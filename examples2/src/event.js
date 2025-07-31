@@ -1,14 +1,30 @@
 import { updaterQueue, flushUpdateQueue } from "./Component";
+/**
+ * 添加事件监听入口
+ * @param {*} dom
+ * @param {*} eventName
+ * @param {*} bindFunction
+ * @returns
+ */
 export function addEvent(dom, eventName, bindFunction) {
   dom.attach = dom.attach ?? {};
+  // 将事件函数绑定到dom的attach对象上
   dom.attach[eventName] = bindFunction;
+  // 事件代理，在document上添加事件监听
   if (document[eventName]) return;
   document[eventName] = dispatchEvent;
 }
 
+/**
+ * 事件分发
+ * @param {*} nativeEvent
+ */
 function dispatchEvent(nativeEvent) {
+  // 开启批量更新
   updaterQueue.isBatch = true;
+  // 创建合成事件对象
   let syntheticEvent = createSyntheticEvent(nativeEvent);
+  // 获取事件源开始冒泡
   let target = nativeEvent.target;
   while (target) {
     let eventName = `on${nativeEvent.type}`;

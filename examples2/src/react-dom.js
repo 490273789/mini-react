@@ -72,6 +72,7 @@ function mountArray(children, parent) {
 
 /**
  * 处理函数组件
+ * 先获取虚拟DOM，再将虚拟DOM转化为真实DOM
  * @param {*} VNode
  * @returns
  */
@@ -84,6 +85,10 @@ function getDomByFunctionComponent(VNode) {
 
 /**
  * 处理类组件
+ * 1、获取类组件实例
+ * 2、执行render函数获取虚拟DOM
+ * 3、绑定oldVNode
+ * 4、将虚拟DOM转化为真实DOM
  * @param {*} VNode
  * @returns
  */
