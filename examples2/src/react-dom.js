@@ -1,9 +1,10 @@
-import { REACT_ELEMENT } from "./constants";
+import { REACT_ELEMENT, REACT_FORWARD_REF } from "./constants";
 import { addEvent } from "./event";
 
 function render(VNode, containerDOM) {
   // 虚拟DOM转化为真实DOM
   // 将得到的DOM挂在到containerDOM中
+  // debugger;
   mount(VNode, containerDOM);
 }
 
@@ -14,8 +15,11 @@ function mount(VNode, containerDOM) {
 
 function createDOM(VNode) {
   // 1. 创建元素；2. 处理子元素；3. 处理属性值
-  const { type, props } = VNode;
+  const { type, props, ref } = VNode;
   let dom;
+  if (type && type.$$typeof === REACT_FORWARD_REF) {
+    return getDomByForwardRefFunction(VNode);
+  }
   if (
     typeof type === "function" &&
     VNode.$$typeof === REACT_ELEMENT &&
@@ -39,6 +43,7 @@ function createDOM(VNode) {
     }
   }
   setPropsForDOM(dom, props);
+  ref && (ref.current = dom);
   VNode.dom = dom;
   return dom;
 }
@@ -71,6 +76,17 @@ function mountArray(children, parent) {
 }
 
 /**
+ * 处理forWardRef
+ * @param {*} VNode
+ * @returns
+ */
+function getDomByForwardRefFunction(VNode) {
+  const { type, props, ref } = VNode;
+  let renderVNode = type.render(props, ref);
+  if (!renderVNode) return null;
+  return createDOM(renderVNode);
+}
+/**
  * 处理函数组件
  * 先获取虚拟DOM，再将虚拟DOM转化为真实DOM
  * @param {*} VNode
@@ -93,8 +109,9 @@ function getDomByFunctionComponent(VNode) {
  * @returns
  */
 function getDomByClassComponent(VNode) {
-  const { type, props } = VNode;
+  let { type, props, ref } = VNode;
   const instance = new type(props);
+  ref && (ref.current = instance);
   let renderVNode = instance.render();
   instance.oldVNode = renderVNode;
   if (!renderVNode) return null;

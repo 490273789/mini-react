@@ -1,15 +1,6 @@
 import ReactDom from "./react-dom.js";
 import React from "./react.js";
 
-function MyFunctionComponent(props) {
-  return (
-    <div key="key" class="class" kk="kk" style={{ color: "red" }}>
-      {props.title} <span>World1</span>
-      <span>World2</span>
-    </div>
-  );
-}
-
 class MyClassComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -38,17 +29,35 @@ class MyClassComponent extends React.Component {
     );
   }
 }
-ReactDom.render(
-  <MyClassComponent title="Hello" />,
-  document.getElementById("root")
-);
 
-console.log(
-  <div key="key" class="class" kk="kk" style={{ color: "red" }}>
-    Hello <span>World1</span>
-    <span>World2</span>
-  </div>
-);
+const MyForwardRefFunctionComponent = React.forwardRef((props, ref) => {
+  return <div ref={ref}></div>;
+});
+function MyFunctionComponent() {
+  let textInput = React.createRef();
+  let counterComponentRef = React.createRef();
+  let functionRef = React.createRef();
+  const focusInput = () => {
+    textInput.current.focus();
+  };
+  const show100 = () => {
+    counterComponentRef.current.updateCount(100);
+  };
+
+  return (
+    <div>
+      <input type="text" ref={textInput} />
+      <input type="button" value="Focus the text input" onClick={focusInput} />
+      <div onClick={() => show100()}>show100</div>
+      <MyClassComponent title="Hello" ref={counterComponentRef} />
+      <MyForwardRefFunctionComponent ref={functionRef} />
+    </div>
+  );
+}
+
+ReactDom.render(<MyFunctionComponent />, document.getElementById("root"));
+
+console.log(<MyForwardRefFunctionComponentMyF />);
 
 // React.createElement(
 //   "div",

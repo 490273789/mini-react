@@ -20,6 +20,7 @@ export function addEvent(dom, eventName, bindFunction) {
  * @param {*} nativeEvent
  */
 function dispatchEvent(nativeEvent) {
+  // debugger;
   // 开启批量更新
   updaterQueue.isBatch = true;
   // 创建合成事件对象

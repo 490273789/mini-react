@@ -1,4 +1,4 @@
-import { REACT_ELEMENT } from "./constants.js";
+import { REACT_ELEMENT, REACT_FORWARD_REF } from "./constants.js";
 import { Component } from "./Component.js";
 // jsx被编译后的结果
 // React.createElement(
@@ -14,6 +14,7 @@ import { Component } from "./Component.js";
 //   React.createElement("span", null, "World2")
 // );
 export function createElement(type, properties, children) {
+  console.log("properties:", properties);
   const key = properties.key ?? null;
   const ref = properties.ref ?? null;
   ["key", "ref", "_self", "_source"].forEach((prop) => {
@@ -36,9 +37,22 @@ export function createElement(type, properties, children) {
     props,
   };
 }
+export function forwardRef(render) {
+  return {
+    $$typeof: REACT_FORWARD_REF,
+    render,
+  };
+}
 
+function createRef() {
+  return {
+    current: null,
+  };
+}
 const React = {
   createElement,
   Component,
+  createRef,
+  forwardRef,
 };
 export default React;
